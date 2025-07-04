@@ -1,7 +1,7 @@
 {
-  "name": "fetcher",
+  "name": "fetcher.js",
   "version": "0.0.1",
-  "description": "fetcher",
+  "description": "fetcher.js",
   "main": "dist/index.js",
   "scripts": {
     "install:pkg": "pnpm install --frozen-lockfile",
