@@ -1,0 +1,14 @@
+{
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.fixAll.ts": "always",
+    "source.sortImports": "always",
+    "source.organizeImports": "explicit"
+  },
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "cSpell.words": ["pino"]
+}
