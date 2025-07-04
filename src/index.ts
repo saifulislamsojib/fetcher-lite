@@ -1,1 +1,2 @@
-export { Fetcher } from './Fetcher';
+export { convertParams, default } from './Fetcher';
+export type * from './types';
