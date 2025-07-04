@@ -1,17 +1,15 @@
 {
-  "name": "fetcher.js",
+  "name": "fetcher-lite",
   "version": "0.0.1",
-  "description": "fetcher.js",
+  "description": "Fetcher Lite - Universal Fetch Wrapper",
   "main": "dist/index.js",
   "scripts": {
     "install:pkg": "pnpm install --frozen-lockfile",
     "preinstall": "npx only-allow pnpm",
-    "start": "node dist/index.js",
-    "dev": "tsx watch --clear-screen=false --include './src/**/*' -r tsconfig-paths/register src/index.ts",
     "build": "tsc && tsc-alias",
     "typecheck": "tsc --noEmit && tsc -p src/tests/tsconfig.json --noEmit",
     "lint": "eslint --max-warnings 0 --fix",
-    "lintcheck": "eslint",
+    "lintcheck": "eslint --max-warnings 0",
     "format": "prettier --log-level warn --write \"./**/*.{js,mjs,cjs,ts,d.ts,mts,json,yaml,yml,html}\"",
     "test": "vitest run",
     "test:w": "vitest --watch",
@@ -19,9 +17,28 @@
     "lint-staged": "lint-staged",
     "prepare": "husky || true"
   },
+  "exports": {
+    ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        }
+      },
+    "./Fetcher": {
+      "types": "./dist/Fetcher.d.ts",
+      "default": "./dist/Fetcher.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts"
+    }
+  },
   "keywords": [],
-  "author": "Saiful Islam Sojib",
-  "license": "ISC",
+  "author": "https://github.com/saifulislamsojib",
+  "license": "MIT",
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
@@ -38,8 +55,6 @@
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "tsc-alias": "^1.8.16",
-    "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.1",
     "vitest": "^3.2.4"
