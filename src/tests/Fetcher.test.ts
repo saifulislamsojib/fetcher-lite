@@ -29,6 +29,7 @@ describe('FetcherJS basic API requests (mocked)', () => {
     expect(res.data.length).toBeGreaterThan(0);
 
     const { method, url } = getLastFetchCall() || {};
+    expect(url).toContain(baseUrl);
     expect(url).toContain('/posts');
     expect(method).toBe('GET');
   });

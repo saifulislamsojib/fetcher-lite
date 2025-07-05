@@ -2,15 +2,15 @@ import type {
   Configs,
   FetcherError,
   FetcherOptions,
+  FetcherParams,
+  FetcherResponse,
   FetchOptions,
-  FetchParams,
   FinalError,
   JsonAble,
   MethodOptions,
   OptionExtractor,
   RequestBody,
   ResponseBody,
-  ResponseType,
 } from './types';
 
 class Fetcher {
@@ -60,11 +60,8 @@ class Fetcher {
 
     if (params) {
       const search = Fetcher.convertParams(params);
-      if (url instanceof URL) {
-        url.search += (url.search ? '&' : '?') + search;
-      } else {
-        url += (url.includes('?') ? '&' : '?') + search;
-      }
+      if (url instanceof URL) url.search += (url.search ? '&' : '?') + search;
+      else url += (url.includes('?') ? '&' : '?') + search;
       delete options.params;
     }
 
@@ -73,9 +70,7 @@ class Fetcher {
       const timeoutSignal = AbortSignal.timeout(timeout);
       if (options.signal) {
         options.signal = AbortSignal.any([options.signal, timeoutSignal]);
-      } else {
-        options.signal = timeoutSignal;
-      }
+      } else options.signal = timeoutSignal;
     }
 
     const finalOptions: RequestInit = { ...this.configsExtractor(this.configs, url), ...options };
@@ -84,11 +79,8 @@ class Fetcher {
       if (finalOptions.headers) Fetcher.getHeaders(finalOptions).delete('Content-Type');
       finalOptions.body = body;
     } else if (body !== undefined) {
-      if (!finalOptions.headers) {
-        finalOptions.headers = { 'Content-Type': 'application/json' };
-      } else {
-        Fetcher.getHeaders(finalOptions).set('Content-Type', 'application/json');
-      }
+      if (!finalOptions.headers) finalOptions.headers = { 'Content-Type': 'application/json' };
+      else Fetcher.getHeaders(finalOptions).set('Content-Type', 'application/json');
       finalOptions.body = JSON.stringify(body);
     }
     const response = await fetch(
@@ -106,37 +98,37 @@ class Fetcher {
       throw await this.finalError(error, url);
     });
 
-    if (!response.ok) {
+    const { ok, status, statusText } = response;
+    if (!ok) {
       const error = new Error(
-        `Request failed with status code ${response.status} -- ${response.statusText}`,
+        `Request failed with status code ${status} -- ${statusText}`,
       ) as FetcherError;
-      error.name = response.statusText;
-      error.status = response.status;
+      error.name = statusText;
+      error.status = status;
       error.ok = false;
       if (this.isJson(response)) error.data = (await response.json()) as JsonAble;
       throw await this.finalError(error, url);
     }
 
-    let data: TResData;
+    let data: TResData | undefined;
     if (
       options.method !== 'HEAD' &&
       options.method !== 'OPTIONS' &&
       (responseType !== 'json' || this.isJson(response))
     ) {
-      if (responseType === 'stream') {
-        data = response.body as TResData;
-      } else {
-        data = (await response[responseType]()) as TResData;
-      }
-    } else {
-      data = null as TResData;
+      if (responseType === 'stream') data = response.body as TResData;
+      else if (response[responseType]) data = (await response[responseType]()) as TResData;
     }
-
-    const responseObj: ResponseType<TResData> = {
-      status: response.status,
-      ok: response.ok,
+    const responseObj: FetcherResponse<TResData> = {
+      ok,
+      status,
+      statusText,
+      type: response.type,
       headers: response.headers,
-      data,
+      redirected: response.redirected,
+      bodyUsed: response.bodyUsed,
+      url: response.url,
+      data: (data || null) as TResData,
     };
     return responseObj;
   }
@@ -181,7 +173,7 @@ class Fetcher {
     return this.fetcher<null>(url, { ...options, method: 'OPTIONS' });
   }
 
-  static convertParams = (params: FetchParams) => {
+  static convertParams = (params: FetcherParams) => {
     const paramsArr = Object.keys(params);
     if (!paramsArr.length) return '';
     const searchParams = new URLSearchParams();
@@ -193,15 +185,10 @@ class Fetcher {
       } else if (Array.isArray(value)) {
         value.forEach((v) => {
           if (v === undefined || v === null || v === '') return;
-          if (typeof v === 'string') {
-            searchParams.append(key, v);
-          } else {
-            searchParams.append(key, String(v));
-          }
+          if (typeof v === 'string') searchParams.append(key, v);
+          else searchParams.append(key, String(v));
         });
-      } else {
-        searchParams.append(key, String(value));
-      }
+      } else searchParams.append(key, String(value));
     });
     return searchParams.toString();
   };
