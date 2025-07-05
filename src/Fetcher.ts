@@ -12,6 +12,7 @@ import type {
   ResponseBody,
   ResponseType,
 } from './types';
+
 class Fetcher {
   private configs: Configs = {};
   private baseUrl: string;
@@ -79,18 +80,14 @@ class Fetcher {
 
     const finalOptions: RequestInit = { ...this.configsExtractor(this.configs, url), ...options };
 
-    type Params = Record<string, string>;
     if (body instanceof FormData) {
-      if (finalOptions.headers) {
-        delete (finalOptions.headers as Params)['Content-Type'];
-        delete (finalOptions.headers as Params)['content-type'];
-      }
+      if (finalOptions.headers) Fetcher.getHeaders(finalOptions).delete('Content-Type');
       finalOptions.body = body;
     } else if (body !== undefined) {
       if (!finalOptions.headers) {
         finalOptions.headers = { 'Content-Type': 'application/json' };
       } else {
-        (finalOptions.headers as Params)['Content-Type'] = 'application/json';
+        Fetcher.getHeaders(finalOptions).set('Content-Type', 'application/json');
       }
       finalOptions.body = JSON.stringify(body);
     }
@@ -98,13 +95,13 @@ class Fetcher {
       url instanceof URL ? url : url.startsWith('http') ? url : `${this.baseUrl}${url}`,
       finalOptions,
     ).catch(async (err: Error) => {
-      const isTimeout = err.name === 'TimeoutError';
+      const isTimeout = err.name === 'TimeoutError' || err.message === 'TimeoutError';
       const error = new Error(
         isTimeout ? 'Request timed out' : err.message || 'Failed to fetch',
       ) as FetcherError;
       error.status = 500;
       error.ok = false;
-      error.name = err.name || 'NetworkError';
+      error.name = isTimeout ? 'TimeoutError' : err.name || 'NetworkError';
       if (isTimeout) error.status = 408;
       throw await this.finalError(error, url);
     });
@@ -208,8 +205,14 @@ class Fetcher {
     });
     return searchParams.toString();
   };
+
+  static getHeaders = (init: Pick<RequestInit, 'headers'>): Headers => {
+    if (init.headers instanceof Headers) return init.headers;
+    init.headers = new Headers(init.headers);
+    return init.headers;
+  };
 }
 
 Object.freeze(Fetcher);
 export default Fetcher;
-export const { convertParams } = Fetcher;
+export const { convertParams, getHeaders } = Fetcher;
