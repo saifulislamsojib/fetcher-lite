@@ -1,12 +1,12 @@
 {
   "name": "fetcher-lite",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "Fetcher Lite - Universal Fetch Wrapper",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "install:pkg": "pnpm install --frozen-lockfile",
-    "preinstall": "npx only-allow pnpm",
-    "build": "tsc && tsc-alias",
+    "build": "npm run typecheck && tsup src/index.ts --dts --format esm,cjs --minify",
     "typecheck": "tsc --noEmit && tsc -p src/tests/tsconfig.json --noEmit",
     "lint": "eslint --max-warnings 0 --fix",
     "lintcheck": "eslint --max-warnings 0",
@@ -16,25 +16,6 @@
     "coverage": "vitest run --coverage",
     "lint-staged": "lint-staged",
     "prepare": "husky || true"
-  },
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./Fetcher": {
-      "types": "./dist/Fetcher.d.ts",
-      "default": "./dist/Fetcher.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts"
-    }
   },
   "keywords": [],
   "author": "https://github.com/saifulislamsojib",
@@ -54,7 +35,6 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
-    "tsc-alias": "^1.8.16",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.1",

@@ -1,4 +1,4 @@
-import type { JsonAble } from '@/types';
+import type { JsonAble } from '../';
 
 type HeadersInit = Exclude<RequestInit['headers'], undefined>;
 type MockFetchCall = {

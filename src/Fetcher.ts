@@ -214,7 +214,7 @@ class Fetcher {
     return init.headers;
   };
 
-  static createFetcher = (options: FetcherOptions) => new Fetcher(options) as Readonly<Fetcher>;
+  static createFetcher = (options?: FetcherOptions) => new Fetcher(options) as Readonly<Fetcher>;
 }
 
 export type { Fetcher };

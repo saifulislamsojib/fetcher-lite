@@ -1,4 +1,4 @@
-import { createFetcher, type Configs, type FetcherError } from '@/index';
+import { createFetcher, type Configs, type FetcherError } from '../';
 import { getLastFetchCall, mockFetchError, mockFetchResponse, mockFetchStream } from './mockFetch';
 
 const baseUrl = 'https://jsonplaceholder.typicode.com';

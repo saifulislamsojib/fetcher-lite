@@ -3,4 +3,4 @@
 !package.json
 !README.md
 
-dist/types.js
+dist/index.d.mts

@@ -10,21 +10,14 @@
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "noEmit": true,
     "skipLibCheck": true,
-    "removeComments": true,
-    "noEmitOnError": true,
-    "resolveJsonModule": true,
     "allowUnreachableCode": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "erasableSyntaxOnly": true,
-    "declaration": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "erasableSyntaxOnly": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "src/tests"]
