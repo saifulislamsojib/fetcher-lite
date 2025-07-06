@@ -27,7 +27,6 @@ class Fetcher {
         'The Fetch Web API is not supported in this environment, please use in a browser environment or Node.js version >= 18',
       );
     }
-
     this.baseUrl = baseUrl;
     this.timeout = timeout;
   }
@@ -60,8 +59,11 @@ class Fetcher {
 
     if (params) {
       const search = Fetcher.convertParams(params);
-      if (url instanceof URL) url.search += (url.search ? '&' : '?') + search;
-      else url += (url.includes('?') ? '&' : '?') + search;
+      if (url instanceof URL) {
+        url.search += (url.search ? '&' : '?') + search;
+      } else {
+        url += (url.includes('?') ? '&' : '?') + search;
+      }
       delete options.params;
     }
 
@@ -72,15 +74,19 @@ class Fetcher {
         options.signal = AbortSignal.any([options.signal, timeoutSignal]);
       } else options.signal = timeoutSignal;
     }
-
     const finalOptions: RequestInit = { ...this.configsExtractor(this.configs, url), ...options };
 
     if (body instanceof FormData) {
-      if (finalOptions.headers) Fetcher.getHeaders(finalOptions).delete('Content-Type');
+      if (finalOptions.headers) {
+        Fetcher.getHeaders(finalOptions).delete('Content-Type');
+      }
       finalOptions.body = body;
     } else if (body !== undefined) {
-      if (!finalOptions.headers) finalOptions.headers = { 'Content-Type': 'application/json' };
-      else Fetcher.getHeaders(finalOptions).set('Content-Type', 'application/json');
+      if (!finalOptions.headers) {
+        finalOptions.headers = { 'Content-Type': 'application/json' };
+      } else {
+        Fetcher.getHeaders(finalOptions).set('Content-Type', 'application/json');
+      }
       finalOptions.body = JSON.stringify(body);
     }
     const response = await fetch(
@@ -91,10 +97,9 @@ class Fetcher {
       const error = new Error(
         isTimeout ? 'Request timed out' : err.message || 'Failed to fetch',
       ) as FetcherError;
-      error.status = 500;
+      error.status = isTimeout ? 408 : 500;
       error.ok = false;
       error.name = isTimeout ? 'TimeoutError' : err.name || 'NetworkError';
-      if (isTimeout) error.status = 408;
       throw await this.finalError(error, url);
     });
 
@@ -106,7 +111,9 @@ class Fetcher {
       error.name = statusText;
       error.status = status;
       error.ok = false;
-      if (this.isJson(response)) error.data = (await response.json()) as JsonAble;
+      if (this.isJson(response)) {
+        error.data = (await response.json()) as JsonAble;
+      }
       throw await this.finalError(error, url);
     }
 
@@ -116,8 +123,11 @@ class Fetcher {
       options.method !== 'OPTIONS' &&
       (responseType !== 'json' || this.isJson(response))
     ) {
-      if (responseType === 'stream') data = response.body as TResData;
-      else if (response[responseType]) data = (await response[responseType]()) as TResData;
+      if (responseType === 'stream') {
+        data = response.body as TResData;
+      } else if (response[responseType]) {
+        data = (await response[responseType]()) as TResData;
+      }
     }
     const responseObj: FetcherResponse<TResData> = {
       ok,
@@ -185,10 +195,15 @@ class Fetcher {
       } else if (Array.isArray(value)) {
         value.forEach((v) => {
           if (v === undefined || v === null || v === '') return;
-          if (typeof v === 'string') searchParams.append(key, v);
-          else searchParams.append(key, String(v));
+          if (typeof v === 'string') {
+            searchParams.append(key, v);
+          } else {
+            searchParams.append(key, String(v));
+          }
         });
-      } else searchParams.append(key, String(value));
+      } else {
+        searchParams.append(key, String(value));
+      }
     });
     return searchParams.toString();
   };
@@ -198,8 +213,9 @@ class Fetcher {
     init.headers = new Headers(init.headers);
     return init.headers;
   };
+
+  static createFetcher = (options: FetcherOptions) => new Fetcher(options) as Readonly<Fetcher>;
 }
 
-Object.freeze(Fetcher);
-export default Fetcher;
-export const { convertParams, getHeaders } = Fetcher;
+export type { Fetcher };
+export const { createFetcher, convertParams } = Fetcher;

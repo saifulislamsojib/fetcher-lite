@@ -1,8 +1,8 @@
-import Fetcher, { type Configs, type FetcherError } from '@/index';
+import { createFetcher, type Configs, type FetcherError } from '@/index';
 import { getLastFetchCall, mockFetchError, mockFetchResponse, mockFetchStream } from './mockFetch';
 
 const baseUrl = 'https://jsonplaceholder.typicode.com';
-const fetcher = new Fetcher({ baseUrl, timeout: 5000 });
+const fetcher = createFetcher({ baseUrl, timeout: 5000 });
 
 type Post = {
   id?: number;
@@ -94,7 +94,7 @@ describe('FetcherJS advanced cases (mocked)', () => {
   });
 
   it('should abort request after timeout', async () => {
-    const slowFetcher = new Fetcher({ baseUrl, timeout: 1 });
+    const slowFetcher = createFetcher({ baseUrl, timeout: 1 });
     mockFetchError('TimeoutError');
     try {
       await slowFetcher.get('/posts/1');
@@ -114,7 +114,7 @@ describe('FetcherJS advanced cases (mocked)', () => {
 
   it('should trigger configExtractor with url', async () => {
     const spy = vi.fn((configs: Configs) => configs);
-    const spyFetcher = new Fetcher({ baseUrl });
+    const spyFetcher = createFetcher({ baseUrl });
     spyFetcher.extractConfigs(spy);
 
     mockFetchResponse({ id: 1 });
@@ -123,7 +123,7 @@ describe('FetcherJS advanced cases (mocked)', () => {
   });
 
   it('should trigger finalError and return custom error', async () => {
-    const customFetcher = new Fetcher({ baseUrl });
+    const customFetcher = createFetcher({ baseUrl });
     customFetcher.setFinalError((err) => {
       const wrapped = new Error('Custom Error Wrap');
       Object.assign(wrapped, err);

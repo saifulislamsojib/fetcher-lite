@@ -19,15 +19,15 @@
   },
   "exports": {
     ".": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/index.js"
-        },
-        "require": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/index.js"
-        }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
     "./Fetcher": {
       "types": "./dist/Fetcher.d.ts",
       "default": "./dist/Fetcher.js"
@@ -55,6 +55,7 @@
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "tsc-alias": "^1.8.16",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.1",
     "vitest": "^3.2.4"

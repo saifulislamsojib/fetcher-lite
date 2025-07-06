@@ -1,10 +1,9 @@
 type Primitive = string | number | boolean | null | undefined;
 type JsonPrimitive = Exclude<Primitive, undefined>;
-export type JsonArray = (JsonPrimitive | JsonObject | JsonArray)[];
+export type JsonAble = JsonPrimitive | JsonObject | JsonAble[];
 export interface JsonObject {
-  [key: string]: Primitive | JsonArray | JsonObject;
+  [key: string]: JsonAble | undefined;
 }
-export type JsonAble = JsonPrimitive | JsonObject | JsonArray;
 export type FetcherParams = Record<string, Primitive | Primitive[]>;
 export type RequestBody = JsonAble | FormData;
 export type ResponseBody =
@@ -15,8 +14,11 @@ export type ResponseBody =
   | Uint8Array<ArrayBufferLike>;
 
 export type Configs = Omit<RequestInit, 'body' | 'signal' | 'method'>;
-type BaseResponseType = 'json' | 'arrayBuffer' | 'text' | 'stream' | 'blob';
-type ResponseType = 'bytes' extends keyof Response ? BaseResponseType | 'bytes' : BaseResponseType;
+
+type Bytes = 'bytes' extends keyof Response ? 'bytes' : never;
+
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type ResponseType = 'json' | 'arrayBuffer' | 'text' | 'stream' | 'blob' | Bytes;
 
 export type MethodOptions = Configs & {
   timeout?: number;
