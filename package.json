@@ -1,6 +1,6 @@
 {
   "name": "fetcher-lite",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Fetcher Lite - Universal Fetch Wrapper",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -17,7 +17,7 @@
     "lint-staged": "lint-staged",
     "prepare": "husky || true"
   },
-  "keywords": [],
+  "keywords": ["fetcher", "fetcher-lite", "axios", "axios-lite"],
   "author": "https://github.com/saifulislamsojib",
   "license": "MIT",
   "packageManager": "pnpm@10.11.0",

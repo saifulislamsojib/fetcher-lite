@@ -1,10 +1,10 @@
 import type {
+  BaseMethodOptions,
   Configs,
   FetcherError,
   FetcherOptions,
   FetcherParams,
   FetcherResponse,
-  FetchOptions,
   FinalError,
   JsonAble,
   MethodOptions,
@@ -14,12 +14,12 @@ import type {
 } from './types';
 
 class Fetcher {
-  private configs: Configs = {};
-  private baseUrl: string;
-  private timeout: number;
+  #configs: Configs = {};
+  readonly #baseUrl: string;
+  readonly #timeout: number;
 
-  private configsExtractor: OptionExtractor = (configs) => configs;
-  private finalError: FinalError = (err) => err;
+  #configsExtractor: OptionExtractor = (configs) => configs;
+  #finalError: FinalError = (err) => err;
 
   constructor({ baseUrl = '', timeout = 0 }: FetcherOptions = {}) {
     if (typeof fetch === 'undefined') {
@@ -27,32 +27,34 @@ class Fetcher {
         'The Fetch Web API is not supported in this environment, please use in a browser environment or Node.js version >= 18',
       );
     }
-    this.baseUrl = baseUrl;
-    this.timeout = timeout;
+    this.#baseUrl = baseUrl;
+    this.#timeout = timeout;
   }
 
-  public extractConfigs(optionExtractor: OptionExtractor) {
-    this.configsExtractor = optionExtractor;
+  extractConfigs(optionExtractor: OptionExtractor) {
+    this.#configsExtractor = optionExtractor;
   }
 
-  public setFinalError(finalError: FinalError) {
-    this.finalError = finalError;
+  setFinalError(finalError: FinalError) {
+    this.#finalError = finalError;
   }
 
-  public setDefaultConfigs(configs: Configs) {
-    this.configs = configs;
+  setDefaultConfigs(configs: Configs) {
+    this.#configs = configs;
   }
 
-  private isJson(res: Response) {
-    return res.headers.get('content-type')?.includes('application/json');
+  #isJson({ headers }: Response) {
+    return headers.get('content-type')?.includes('application/json');
   }
 
-  private async fetcher<TResData extends ResponseBody>(
+  async #fetcher<TResData extends ResponseBody>(
     url: string | URL,
-    options: FetchOptions,
+    options: MethodOptions & {
+      method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+    },
     body?: RequestBody,
   ) {
-    const timeout = options.timeout ?? this.timeout;
+    const timeout = options.timeout ?? this.#timeout;
     const params = options.params;
     const responseType = options.responseType || 'json';
     delete options.responseType;
@@ -74,7 +76,7 @@ class Fetcher {
         options.signal = AbortSignal.any([options.signal, timeoutSignal]);
       } else options.signal = timeoutSignal;
     }
-    const finalOptions: RequestInit = { ...this.configsExtractor(this.configs, url), ...options };
+    const finalOptions: RequestInit = { ...this.#configsExtractor(this.#configs, url), ...options };
 
     if (body instanceof FormData) {
       if (finalOptions.headers) {
@@ -90,7 +92,7 @@ class Fetcher {
       finalOptions.body = JSON.stringify(body);
     }
     const response = await fetch(
-      url instanceof URL ? url : url.startsWith('http') ? url : `${this.baseUrl}${url}`,
+      url instanceof URL ? url : url.startsWith('http') ? url : `${this.#baseUrl}${url}`,
       finalOptions,
     ).catch(async (err: Error) => {
       const isTimeout = err.name === 'TimeoutError' || err.message === 'TimeoutError';
@@ -100,7 +102,7 @@ class Fetcher {
       error.status = isTimeout ? 408 : 500;
       error.ok = false;
       error.name = isTimeout ? 'TimeoutError' : err.name || 'NetworkError';
-      throw await this.finalError(error, url);
+      throw await this.#finalError(error, url);
     });
 
     const { ok, status, statusText } = response;
@@ -111,17 +113,17 @@ class Fetcher {
       error.name = statusText;
       error.status = status;
       error.ok = false;
-      if (this.isJson(response)) {
+      if (this.#isJson(response)) {
         error.data = (await response.json()) as JsonAble;
       }
-      throw await this.finalError(error, url);
+      throw await this.#finalError(error, url);
     }
 
     let data: TResData | undefined;
     if (
       options.method !== 'HEAD' &&
       options.method !== 'OPTIONS' &&
-      (responseType !== 'json' || this.isJson(response))
+      (responseType !== 'json' || this.#isJson(response))
     ) {
       if (responseType === 'stream') {
         data = response.body as TResData;
@@ -143,44 +145,44 @@ class Fetcher {
     return responseObj;
   }
 
-  public get<T extends ResponseBody = JsonAble>(url: string | URL, options: MethodOptions = {}) {
-    return this.fetcher<T>(url, { ...options, method: 'GET' });
+  get<T extends ResponseBody = JsonAble>(url: string | URL, options: MethodOptions = {}) {
+    return this.#fetcher<T>(url, { ...options, method: 'GET' });
   }
 
-  public post<T extends ResponseBody = JsonAble>(
+  post<T extends ResponseBody = JsonAble>(
     url: string | URL,
     body: RequestBody,
     options: MethodOptions = {},
   ) {
-    return this.fetcher<T>(url, { ...options, method: 'POST' }, body);
+    return this.#fetcher<T>(url, { ...options, method: 'POST' }, body);
   }
 
-  public patch<T extends ResponseBody = JsonAble>(
+  patch<T extends ResponseBody = JsonAble>(
     url: string | URL,
     body: RequestBody,
     options: MethodOptions = {},
   ) {
-    return this.fetcher<T>(url, { ...options, method: 'PATCH' }, body);
+    return this.#fetcher<T>(url, { ...options, method: 'PATCH' }, body);
   }
 
-  public put<T extends ResponseBody = JsonAble>(
+  put<T extends ResponseBody = JsonAble>(
     url: string | URL,
     body: RequestBody,
     options: MethodOptions = {},
   ) {
-    return this.fetcher<T>(url, { ...options, method: 'PUT' }, body);
+    return this.#fetcher<T>(url, { ...options, method: 'PUT' }, body);
   }
 
-  public delete<T extends ResponseBody = JsonAble>(url: string | URL, options: MethodOptions = {}) {
-    return this.fetcher<T>(url, { ...options, method: 'DELETE' });
+  delete<T extends ResponseBody = JsonAble>(url: string | URL, options: MethodOptions = {}) {
+    return this.#fetcher<T>(url, { ...options, method: 'DELETE' });
   }
 
-  public head(url: string | URL, options: Omit<MethodOptions, 'responseType'> = {}) {
-    return this.fetcher<null>(url, { ...options, method: 'HEAD' });
+  head(url: string | URL, options: BaseMethodOptions = {}) {
+    return this.#fetcher<null>(url, { ...options, method: 'HEAD' });
   }
 
-  public options(url: string | URL, options: Omit<MethodOptions, 'responseType'> = {}) {
-    return this.fetcher<null>(url, { ...options, method: 'OPTIONS' });
+  options(url: string | URL, options: BaseMethodOptions = {}) {
+    return this.#fetcher<null>(url, { ...options, method: 'OPTIONS' });
   }
 
   static convertParams = (params: FetcherParams) => {
@@ -208,7 +210,7 @@ class Fetcher {
     return searchParams.toString();
   };
 
-  static getHeaders = (init: Pick<RequestInit, 'headers'>): Headers => {
+  static getHeaders = (init: RequestInit): Headers => {
     if (init.headers instanceof Headers) return init.headers;
     init.headers = new Headers(init.headers);
     return init.headers;
