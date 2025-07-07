@@ -219,5 +219,7 @@ class Fetcher {
   static createFetcher = (options?: FetcherOptions) => new Fetcher(options) as Readonly<Fetcher>;
 }
 
-export type { Fetcher };
+type TFetcher = InstanceType<typeof Fetcher>;
+
+export type { TFetcher as Fetcher };
 export const { createFetcher, convertParams } = Fetcher;
