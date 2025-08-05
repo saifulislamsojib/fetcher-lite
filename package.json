@@ -1,6 +1,6 @@
 {
   "name": "fetcher-lite",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "Fetcher Lite - Universal Fetch Wrapper",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

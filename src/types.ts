@@ -1,24 +1,15 @@
 type Primitive = string | number | boolean | null | undefined;
 type JsonPrimitive = Exclude<Primitive, undefined>;
 export type JsonAble = JsonPrimitive | JsonObject | JsonAble[];
+export type JsonStringAble = JsonPrimitive | Date | JsonStringObject | JsonStringAble[];
 export interface JsonObject {
   [key: string]: JsonAble | undefined;
 }
+export interface JsonStringObject {
+  [key: string]: JsonStringAble | undefined;
+}
 export type FetcherParams = Record<string, Primitive | Primitive[]>;
-export type RequestBody = JsonAble | FormData;
-// export type ResponseBody<T extends ResponseType> = T extends 'json'
-//   ? JsonAble
-//   : T extends 'arrayBuffer'
-//     ? ArrayBuffer
-//     : T extends 'text'
-//       ? string
-//       : T extends 'blob'
-//         ? Blob
-//         : T extends 'stream'
-//           ? ReadableStream
-//           : T extends 'bytes'
-//             ? Uint8Array<ArrayBufferLike>
-//             : unknown;
+export type RequestBody = JsonStringAble | FormData;
 export type ResponseBody =
   | JsonAble
   | ArrayBuffer
@@ -57,7 +48,7 @@ export interface FetcherError<T extends JsonAble = JsonAble> extends Error {
   data?: T;
 }
 
-export type OptionExtractor = (options: Configs, url: string | URL) => Configs;
+export type ConfigsExtractor = (options: Configs, url: string | URL) => Configs;
 
 export type FinalError = (err: FetcherError, url: string | URL) => Error | Promise<Error>;
 

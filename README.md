@@ -35,6 +35,20 @@ pnpm add fetcher-lite
 ## 🛠️ Basic Usage
 
 ```ts
+import fetcher from 'fetcher-lite';
+
+fetcher.setFetcherOptions({
+  baseUrl: 'https://api.example.com',
+  timeout: 5000,
+});
+
+const response = await fetcher.get('/users');
+console.log(response.data);
+```
+
+## Can Also Create Instance Of Fetcher
+
+```ts
 import { createFetcher } from 'fetcher-lite';
 
 const fetcher = createFetcher({

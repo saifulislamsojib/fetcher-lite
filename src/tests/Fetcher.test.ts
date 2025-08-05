@@ -1,8 +1,9 @@
-import { createFetcher, type Configs, type FetcherError } from '../';
+import fetcher, { createFetcher, type Configs, type FetcherError } from '../';
 import { getLastFetchCall, mockFetchError, mockFetchResponse, mockFetchStream } from './mockFetch';
 
 const baseUrl = 'https://jsonplaceholder.typicode.com';
-const fetcher = createFetcher({ baseUrl, timeout: 5000 });
+
+fetcher.setFetcherOptions({ baseUrl, timeout: 5000 });
 
 type Post = {
   id?: number;

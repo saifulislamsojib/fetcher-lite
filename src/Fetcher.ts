@@ -1,6 +1,7 @@
 import type {
   BaseMethodOptions,
   Configs,
+  ConfigsExtractor,
   FetcherError,
   FetcherOptions,
   FetcherParams,
@@ -8,31 +9,35 @@ import type {
   FinalError,
   JsonAble,
   MethodOptions,
-  OptionExtractor,
   RequestBody,
   ResponseBody,
 } from './types';
 
 class Fetcher {
   #configs: Configs = {};
-  readonly #baseUrl: string;
-  readonly #timeout: number;
+  #baseUrl: string;
+  #timeout: number;
 
-  #configsExtractor: OptionExtractor = (configs) => configs;
+  #configsExtractor: ConfigsExtractor = (configs) => configs;
   #finalError: FinalError = (err) => err;
 
-  constructor({ baseUrl = '', timeout = 0 }: FetcherOptions = {}) {
+  constructor(options?: FetcherOptions) {
     if (typeof fetch === 'undefined') {
       throw new Error(
         'The Fetch Web API is not supported in this environment, please use in a browser environment or Node.js version >= 18',
       );
     }
-    this.#baseUrl = baseUrl;
-    this.#timeout = timeout;
+    this.#baseUrl = options?.baseUrl || '';
+    this.#timeout = options?.timeout || 0;
   }
 
-  extractConfigs(optionExtractor: OptionExtractor) {
-    this.#configsExtractor = optionExtractor;
+  setFetcherOptions(options: FetcherOptions) {
+    if (options.baseUrl) this.#baseUrl = options.baseUrl;
+    if (options.timeout) this.#timeout = options.timeout;
+  }
+
+  extractConfigs(configsExtractor: ConfigsExtractor) {
+    this.#configsExtractor = configsExtractor;
   }
 
   setFinalError(finalError: FinalError) {
@@ -222,4 +227,9 @@ class Fetcher {
 type TFetcher = InstanceType<typeof Fetcher>;
 
 export type { TFetcher as Fetcher };
+
 export const { createFetcher, convertParams } = Fetcher;
+
+const fetcher = createFetcher();
+
+export default fetcher;
