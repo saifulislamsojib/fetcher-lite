@@ -18,6 +18,10 @@
     "prepare": "husky || true"
   },
   "keywords": ["fetcher", "fetcher-lite", "axios", "axios-lite"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saifulislamsojib/textmodifier"
+  },
   "author": "https://github.com/saifulislamsojib",
   "license": "MIT",
   "packageManager": "pnpm@10.11.0",
