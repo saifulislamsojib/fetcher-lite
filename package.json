@@ -1,6 +1,6 @@
 {
   "name": "fetcher-lite",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "Fetcher Lite - Universal Fetch Wrapper",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -20,7 +20,7 @@
   "keywords": ["fetcher", "fetcher-lite", "axios", "axios-lite"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/saifulislamsojib/textmodifier"
+    "url": "https://github.com/saifulislamsojib/fetcher-lite"
   },
   "author": "https://github.com/saifulislamsojib",
   "license": "MIT",
